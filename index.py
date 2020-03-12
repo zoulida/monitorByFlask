@@ -26,7 +26,7 @@ def calc_calender(date):
         month_addr = calendar.month_abbr[month]
         yearInfo[month_addr] = days
     return yearInfo
-
+ 
 
 @app.route('/', methods=["GET", "POST"])
 def index():
