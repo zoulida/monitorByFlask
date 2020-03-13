@@ -1,5 +1,13 @@
 import pymongo
 
+def getCollection():
+    myclient = pymongo.MongoClient("mongodb://202.194.246.155:27017/")
+    mydb = myclient["monitor"]
+    mycol = mydb["updateDate"]
+    return mycol
+
+mycol = getCollection()
+
 def creatDB():
     myclient = pymongo.MongoClient("mongodb://localhost:27017/")
     mydb = myclient["monitor"]
@@ -17,7 +25,6 @@ def isExist():
 def creatCollection():
     myclient = pymongo.MongoClient("mongodb://localhost:27017/")
     mydb = myclient["monitor"]
-
     mycol = mydb["updateDate"]
 
 def isCollectionExist():
@@ -30,24 +37,29 @@ def isCollectionExist():
     if "sites" in collist:  # 判断 sites 集合是否存在
         print("集合已存在！")
 
-def getCollection():
-    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-    mydb = myclient["monitor"]
-    mycol = mydb["updateDate"]
-    return mycol
+
 def insert():
     col = getCollection()
 
-    mydict = {"name": "santai", "date": "20200312", "isupdate": False}
+    mydict = { "date": "2020-03-13", "state":{"santai": False} }
 
     x = col.insert_one(mydict)
     print(x)
 
 def find():
-    mycol = getCollection()
+
     x = mycol.find_one()
 
     print(x)
 
+def findmany():
+
+    myquery = {"date": {"$gt": "20200310"}}
+
+    mydoc = mycol.find(myquery)
+
+    for x in mydoc:
+        print(x)
+
 if __name__ == '__main__':
-    find() 
+    insert()
