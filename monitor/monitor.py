@@ -1,5 +1,6 @@
 __author__ = 'zoulida'
 
+import tools.tusharePro as tp
 import tushare as ts
 import traceback
 import datetime
@@ -9,23 +10,51 @@ mycol = mongodbO.getCollection()
 from tools.LogTools import Logger
 nowTime = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 logName = 'log-' + nowTime + '.txt'
-logger = Logger(logName, logLevel="DEBUG", logger="downTickCVS7.py").getlog()
+logger = Logger(logName, logLevel="DEBUG", logger="monitor.py").getlog()
 
 
-def insert( dayStr):
-    mydict = {"date": "%s" % dayStr, "santai": False}
+
+
+def is_open_day(date):
+    #print(cal_dates[cal_dates['calendarDate'] == date])
+    #if date in cal_dates['calendarDate'].values:
+    #    return cal_dates[cal_dates['calendarDate'] == date].iat[0, 1] == 1
+    strr = date.replace("-","")
+    bl = tp.is_open_day(strr)
+    return bl
+
+def insert(dayStr, datafromStr):
+    isopen = True
+    if not is_open_day(dayStr):
+        isopen = False
+
+    mydict = {"date": "%s" % dayStr, "%s"%datafromStr: False, "isopen": isopen}
     x = mycol.insert_one(mydict)
     print(x)
 
-def update():
-    myquery = {"date": '2019-06-03'}
-    newvalues = {"$set": {"santai" : True}}
+def update(dayStr, datafromStr):
+    myquery = {"date": '%s'%dayStr}
+    newvalues = {"$set": {"%s"%datafromStr : True}}
 
     mycol.update_one(myquery, newvalues)
 
 class MonitorSantai():
     def fetchSantaiStat(self):
-        return True
+        myquery = {"date": {"$gt": "2020-03-01"}}
+
+        mydoc = mycol.find(myquery)
+        #listdata =list(mydoc)
+        #print( listdata)#pymongo.cursor.Cursor变数组
+        dictHaveGet = {}
+        dictIsOpenday = {}
+        for x in mydoc:
+            print(x)
+            dictHaveGet[x['date']] = x['santai']
+            dictIsOpenday[x['date']] = x['isopen']
+        print(dictHaveGet)
+        print(dictIsOpenday)
+
+        return dictHaveGet, dictIsOpenday
 
     # 获取从起始日期到截止日期中间的的所有日期，前后都是封闭区间
     def get_date_list(self, begin_date, end_date):
@@ -61,11 +90,11 @@ class MonitorSantai():
             return
 
         if x is None:#如果空，先插入。这样就肯定是Flase了
-            insert(dayStr)
+            insert(dayStr, 'santai')
 
         if self.getStatSantaiOneDay(dayStr) == True:
             print('update')
-            update()
+            update(dayStr, 'santai')
         #print(x)
 
 

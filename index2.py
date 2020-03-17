@@ -17,6 +17,23 @@ app = Flask(__name__)
 week = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
 
+def monthToNumstr(shortMonth):
+    dictmoon = {
+        'Jan': '01',
+        'Feb': '02',
+        'Mar': '03',
+        'Apr': '04',
+        'May': '05',
+        'Jun': '06',
+        'Jul': '07',
+        'Aug': '08',
+        'Sep': '09',
+        'Oct': '10',
+        'Nov': '11',
+        'Dec': '12'
+    }
+    return dictmoon[shortMonth]
+
 def calc_calender(date):
     year = date.year
     yearInfo = dict()
@@ -24,8 +41,11 @@ def calc_calender(date):
         days = calendar.monthcalendar(year, month)
         if len(days) != 6:
             days.append([0 for _ in range(7)])
-        month_addr = calendar.month_abbr[month]
-        yearInfo[month_addr] = days
+        #month_addr = calendar.month_abbr[month]
+        #month_str = monthToNumstr(month_addr)
+        n = str(month)
+        month_str = n.zfill(2)
+        yearInfo[month_str] = days
     return yearInfo
 
 
@@ -34,11 +54,16 @@ def index():
     updateState = False
     if request.method == "GET":
         date = datetime.today()
-        this_month = calendar.month_abbr[date.month]
+        #this_month = calendar.month_abbr[date.month]
         monitorSantai = MonitorSantai()
         dictHaveGet, dictIsOpenday = monitorSantai.fetchSantaiStat()
-
-        return render_template('index2.html', this_month=this_month, date=date, content=calc_calender(date), updateState = updateState, listJson = listdata )
+        #dictHaveGet = {'2020-03-06': True, '2020-03-07': False, '2020-03-08': True, '2020-03-09': False, '2020-03-10': False,
+        # '2020-03-11': True, '2020-03-12': True, '2020-03-13': False}
+        #print(dictHaveGet)
+        #print(calc_calender(date))
+        context = {'this_month': str(date.month).zfill(2), 'date': date, 'content': calc_calender(date), 'dictHaveGet': dictHaveGet, 'dictIsOpenday': dictIsOpenday}
+        return render_template('index2.html', **context)
+        #return render_template('index2.html', this_month=this_month, date=date, content=calc_calender(date), updateState = updateState, listJson = listdata )
 
 
 @app.route('/sendDate', methods=['GET', 'POST'])
