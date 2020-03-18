@@ -72,7 +72,7 @@
                                         <td style="background-color:#e9d3ff;">
                                            Santai
                                         </td>
-                                    {% elif dictHaveGet[whichday] == True %}
+                                    {% elif dictHaveGetSantai[whichday] == True %}
                                         <td style="background-color:#13ff2f;">
                                            Santai
                                         </td>
@@ -94,9 +94,22 @@
                     <td>&nbsp</td>
 
                     {% else %}
-                    <td>
-                        {{ day }}
-                    </td>
+                        {% with whichday = date.year|string  + "-" + monthstr + "-" + (day|string).zfill(2) %}
+                                    {% if dictIsOpenday[whichday] != True %}
+                                        <td style="background-color:#e9d3ff;">
+                                           TDX
+                                        </td>
+                                    {% elif dictHaveGetTDX[whichday] == True %}
+                                        <td style="background-color:#13ff2f;">
+                                           TDX
+                                        </td>
+                                    {% else%}
+
+                                        <td style="background-color:#faff11;">
+                                           TDX
+                                        </td>
+                                    {% endif %}
+                        {% endwith %}
 
                     {% endif %}
                     {% endfor %}
@@ -108,12 +121,22 @@
                     <td>&nbsp</td>
 
                     {% else %}
-                    <td>
-                        {{ day }}
+                        {% with whichday = date.year|string  + "-" + monthstr + "-" + (day|string).zfill(2) %}
+                                    {% if dictIsOpenday[whichday] != True %}
+                                        <td style="background-color:#e9d3ff;">
+                                           WDJ
+                                        </td>
+                                    {% elif dictHaveGetSantai[whichday] == True %}
+                                        <td style="background-color:#13ff2f;">
+                                           WDJ
+                                        </td>
+                                    {% else%}
 
-
-                    </td>
-
+                                        <td style="background-color:#faff11;">
+                                           WDJ
+                                        </td>
+                                    {% endif %}
+                        {% endwith %}
                     {% endif %}
                     {% endfor %}
                 </tr>

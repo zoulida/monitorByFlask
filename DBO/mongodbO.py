@@ -6,6 +6,12 @@ def getCollection():
     mycol = mydb["updateDate"]
     return mycol
 
+def getTDXCollection():
+    myclient = pymongo.MongoClient("mongodb://202.194.246.155:27017/")
+    mydb = myclient["quantaxis"]
+    mycol = mydb["stock_transaction"]
+    return mycol
+
 mycol = getCollection()
 
 def creatDB():

@@ -9,7 +9,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 import calendar
 from datetime import datetime
-from monitor.monitor import MonitorSantai
+from monitor.monitor import Monitor
 
 calendar.setfirstweekday(firstweekday=6)
 app = Flask(__name__)
@@ -55,13 +55,14 @@ def index():
     if request.method == "GET":
         date = datetime.today()
         #this_month = calendar.month_abbr[date.month]
-        monitorSantai = MonitorSantai()
-        dictHaveGet, dictIsOpenday = monitorSantai.fetchSantaiStat()
+        monitor = Monitor()
+        dictHaveGetSantai, dictHaveGetTDX, dictIsOpenday = monitor.fetchStat()
         #dictHaveGet = {'2020-03-06': True, '2020-03-07': False, '2020-03-08': True, '2020-03-09': False, '2020-03-10': False,
         # '2020-03-11': True, '2020-03-12': True, '2020-03-13': False}
         #print(dictHaveGet)
         #print(calc_calender(date))
-        context = {'this_month': str(date.month).zfill(2), 'date': date, 'content': calc_calender(date), 'dictHaveGet': dictHaveGet, 'dictIsOpenday': dictIsOpenday}
+        context = {'this_month': str(date.month).zfill(2), 'date': date, 'content': calc_calender(date),\
+                   'dictHaveGetSantai': dictHaveGetSantai, 'dictHaveGetTDX': dictHaveGetTDX, 'dictIsOpenday': dictIsOpenday}
         return render_template('index2.html', **context)
         #return render_template('index2.html', this_month=this_month, date=date, content=calc_calender(date), updateState = updateState, listJson = listdata )
 

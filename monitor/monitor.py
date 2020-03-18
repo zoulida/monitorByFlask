@@ -3,12 +3,15 @@ __author__ = 'zoulida'
 import tools.tusharePro as tp
 import tushare as ts
 import traceback
-import datetime
+#import datetime
 import DBO.mongodbO as mongodbO
 mycol = mongodbO.getCollection()
+from datetime import datetime
+import collections
+
 
 from tools.LogTools import Logger
-nowTime = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+nowTime = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 logName = 'log-' + nowTime + '.txt'
 logger = Logger(logName, logLevel="DEBUG", logger="monitor.py").getlog()
 
@@ -38,23 +41,25 @@ def update(dayStr, datafromStr):
 
     mycol.update_one(myquery, newvalues)
 
-class MonitorSantai():
+class MonitorSantai():#作废
     def fetchSantaiStat(self):
-        myquery = {"date": {"$gt": "2020-03-01"}}
+        myquery = {"date": {"$gt": "2020-01-01"}}
 
         mydoc = mycol.find(myquery)
         #listdata =list(mydoc)
         #print( listdata)#pymongo.cursor.Cursor变数组
-        dictHaveGet = {}
+        dictHaveGetSantai = {}
         dictIsOpenday = {}
+        dictHaveGetTDX = {}
         for x in mydoc:
             print(x)
-            dictHaveGet[x['date']] = x['santai']
+            dictHaveGetTDX[x['date']] = x[TDX]
+            dictHaveGetSantai[x['date']] = x['santai']
             dictIsOpenday[x['date']] = x['isopen']
-        print(dictHaveGet)
-        print(dictIsOpenday)
+        #print(dictHaveGetSantai)
+        #print(dictIsOpenday)
 
-        return dictHaveGet, dictIsOpenday
+        return dictHaveGetSantai, dictHaveGetTDX, dictIsOpenday
 
     # 获取从起始日期到截止日期中间的的所有日期，前后都是封闭区间
     def get_date_list(self, begin_date, end_date):
@@ -141,9 +146,164 @@ class MonitorSantai():
             db.close()
         return False
 
+
+class Monitor():
+
+    def fetchSantaiStatold(self):
+        myquery = {"date": {"$gt": "2020-01-01"}}
+
+        mydoc = mycol.find(myquery)
+        #listdata =list(mydoc)
+        #print( listdata)#pymongo.cursor.Cursor变数组
+        dictHaveGetSantai = {}
+        dictIsOpenday = {}
+        dictHaveGetTDX = {}
+        for x in mydoc:
+            print(x)
+            dictHaveGetTDX[x['date']] = x[TDX]
+            dictHaveGetSantai[x['date']] = x['santai']
+            dictIsOpenday[x['date']] = x['isopen']
+        print(dictHaveGetSantai)
+        print(dictHaveGetTDX)
+        print(dictIsOpenday)
+
+        return dictHaveGetSantai, dictHaveGetTDX, dictIsOpenday
+    def fetchStat(self, strDatafrom = 'tdx'):
+        thisyear = datetime.now().year
+        strfromDate = str(thisyear) + "-01-01"
+        myquery = {"date": {"$gt": strfromDate}}
+
+        mydoc = mycol.find(myquery)
+        dictHaveGetSantai = {}
+        dictIsOpenday = {}
+        dictHaveGetTDX = {}
+        for x in mydoc:
+            print(x)
+
+            d = collections.defaultdict(list)
+            d.update(x)
+            dictHaveGetTDX[x['date']] = d[TDX]
+            dictHaveGetSantai[x['date']] = d['santai']
+            dictIsOpenday[x['date']] = x['isopen']
+
+        print(dictHaveGetSantai)
+        print(dictHaveGetTDX)
+        print(dictIsOpenday)
+        return dictHaveGetSantai, dictHaveGetTDX, dictIsOpenday
+
+    # 获取从起始日期到截止日期中间的的所有日期，前后都是封闭区间
+    def get_date_list(self, begin_date, end_date):
+        date_list = []
+        while begin_date <= end_date:
+            # date_str = str(begin_date)
+            date_list.append(begin_date)
+            begin_date += datetime.timedelta(days=1)
+        return date_list
+
+    def manageStatDays(self, strDatafrom = 'tdx'):
+        today = datetime.date.today()
+        yestoday = today + datetime.timedelta(days=-1)
+        z30daysago = yestoday + datetime.timedelta(days=-7)  # 更改为两月了
+        # dates = get_date_list(datetime.date(2018, 6, 30), datetime.date(2018, 7, 16))
+        dates = self.get_date_list(z30daysago, yestoday)
+        for date in dates:
+            str_date = str(date)
+            print('manag'+ strDatafrom + 'StatDays ', str_date)
+            self.manageStatOneDay(str_date, strDatafrom)
+
+
+
+
+    def manageStatOneDay(self, dayStr = '2019-06-03', strDatafrom = 'tdx'):
+        #todaystr = '2020-03-13'
+
+        myquery = {"date": "%s"%dayStr}
+        x = mycol.find_one(myquery)
+        #print(x['state'])
+
+        if x is None:  # 如果空，先插入。这样就肯定是Flase了
+            insert(dayStr, strDatafrom)
+            x = mycol.find_one(myquery)
+
+        import collections
+        d = collections.defaultdict(list)
+        d.update(x)
+        #x.dict.setdefault('d',0)
+        if d is not None and d[strDatafrom] == True:
+            return
+
+
+
+        if strDatafrom == TDX:
+            if self.getStatTDXOneDay(dayStr) == True:
+                print('update')
+                update(dayStr, strDatafrom)
+        if strDatafrom == SANTAI:
+            if self.getStatSantaiOneDay(dayStr) == True:
+                print('update')
+                update(dayStr, strDatafrom)
+        #print(x)
+
+    def getStatTDXOneDay(self, strday):
+        tdxcol = mongodbO.getTDXCollection()
+        count = tdxcol.find_one({ 'date': strday})
+        print(count)
+        if count is not None:
+            return True
+        else:
+            return False
+
+    def getStatSantaiOneDay(self, strday):
+        stocklist = self.getHS300()
+        #print(stocklist)
+
+        i = 0
+        for row in stocklist.itertuples(index=True, name='Pandas'):#防止停牌，要测试10个
+            if i > 2:
+                break
+            code = getattr(row, "code")
+            print('test ',code)
+            if self.findoneSanti(strday, code):
+                return True
+            i = i + 1
+        return False
+
+    def getHS300(self):
+        stock_info = ts.get_hs300s()
+        return stock_info
+
+    def findoneSanti(self, strday, symbol):
+        from tools import connectMySQL
+        cursor, db = connectMySQL.getTickCursorAndDB()  # getTickCursor()
+        try:
+            sqlSentence = "select * from tick_%s" % symbol + " where 日期 = '%s'" %strday
+            #print(sqlSentence)
+            logger.debug(sqlSentence)
+            cursor.execute(sqlSentence)
+            results = cursor.fetchone()
+            if results is not None:
+                #print(results)
+                return True
+        except Exception as e:
+            print('traceback.print_exc():', traceback.print_exc())
+            # 如果以上插入过程出错，跳过这条数据记录，继续往下进行
+            #continue  # break
+        finally:
+            # 关闭游标，提交，关闭数据库连接
+            cursor.close()
+            db.commit()
+            db.close()
+        return False
+
+
+TDX = 'tdx'
+SANTAI = 'santai'
 if __name__ == '__main__':
-    m = MonitorSantai()
+    #m = MonitorSantai()
     #m.findoneSanti( '2019-06-03', '000036')
     #bl = m.getStatSantaiOneDay('2019-06-03')
     #print(bl)
-    m.manageSantaiStatDays()
+    #m.manageSantaiStatDays()
+    mn = Monitor()
+    #mn.manageStatDays(TDX)
+    mn.manageStatDays(SANTAI)
