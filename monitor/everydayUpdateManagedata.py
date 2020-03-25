@@ -14,7 +14,7 @@ sys.path.append(os.getcwd())
 #sys.path.append('/volume/pythonworkspace/santai3')
 
 from tools.LogTools import Logger
-logger = Logger(logName='everydayManageTDXdata.out', logLevel="DEBUG", logger="santai3").getlog()
+logger = Logger(logName='everydayManageTDXdata.out', logLevel="DEBUG", logger="everydayManageTDXdata").getlog()
 
 
 logger.debug(sys.path)
