@@ -23,12 +23,12 @@ logger.debug(sys.path)
 
 def job1():
     print("I'm working for quantaxis.config.update_x.update_task()")
-    time.sleep(2)
+    #time.sleep(2)
     print("job1:", datetime.datetime.now())
     #import tools.LogCut as lc
     #lg = lc.Logger(logName='santailog.out', logLevel="DEBUG", logger="santai3").getlog()
 
-    import monitor.monitor.Monitor as Monitor
+    from monitorpack.monitorpy import Monitor
     mObj = Monitor()
     mObj.manageAll()
 

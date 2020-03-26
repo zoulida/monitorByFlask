@@ -9,7 +9,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify
 import calendar
 from datetime import datetime
-from monitor.monitor import Monitor
+from monitorpack.monitorpy import Monitor
 
 calendar.setfirstweekday(firstweekday=6)
 app = Flask(__name__)
