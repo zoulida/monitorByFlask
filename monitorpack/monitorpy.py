@@ -205,7 +205,7 @@ class Monitor():
 
     def manageStatDays(self, strDatafrom = 'tdx'):
         today = datetime.date.today()
-        yestoday = today + datetime.timedelta(days=-1)
+        yestoday = today + datetime.timedelta(days=0)#days=-1)# 更改为今天了
         z30daysago = yestoday + datetime.timedelta(days=-7)  # 更改为两月了
         # dates = get_date_list(datetime.date(2018, 6, 30), datetime.date(2018, 7, 16))
         dates = self.get_date_list(z30daysago, yestoday)
