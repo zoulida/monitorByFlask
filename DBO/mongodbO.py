@@ -1,19 +1,20 @@
 import pymongo
 
+mongodbIP = "mongodb://192.168.1.104:27017/"
 def getCollection():
-    myclient = pymongo.MongoClient("mongodb://202.194.246.155:27017/")
+    myclient = pymongo.MongoClient(mongodbIP)#("mongodb://202.194.246.155:27017/")
     mydb = myclient["monitor"]
     mycol = mydb["updateDate"]
     return mycol
 
 def getWendujiCollection():
-    myclient = pymongo.MongoClient("mongodb://202.194.246.155:27017/")
+    myclient = pymongo.MongoClient(mongodbIP)#("mongodb://202.194.246.155:27017/")
     mydb = myclient["mydb"]
     mycol = mydb["WuDuJi"]
     return mycol
 
 def getTDXCollection():
-    myclient = pymongo.MongoClient("mongodb://202.194.246.155:27017/")
+    myclient = pymongo.MongoClient(mongodbIP)#("mongodb://202.194.246.155:27017/")
     mydb = myclient["quantaxis"]
     mycol = mydb["stock_transaction"]
     return mycol
