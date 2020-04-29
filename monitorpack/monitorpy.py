@@ -1,5 +1,6 @@
 __author__ = 'zoulida'
 
+from functools import lru_cache
 import tools.tusharePro as tp
 import tushare as ts
 import traceback
@@ -286,6 +287,7 @@ class Monitor():
             i = i + 1
         return False
 
+    @lru_cache(maxsize=5)
     def getHS300(self):
         stock_info = ts.get_hs300s()
         return stock_info
@@ -333,4 +335,6 @@ if __name__ == '__main__':
     #mn.manageStatDays(SANTAI)
     #mn.getStatWendujiOneDay('2020-03-17')
     #mn.manageStatDays(WENDUJI)
-    mn.manageAll()
+    #mn.manageAll()
+    lista = mn.getHS300()
+    print(lista)

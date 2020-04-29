@@ -4,7 +4,7 @@ import pymysql
 # 数据库名称和密码
 name = 'root'
 password = 'root'  # 替换为自己的账户名和密码
-mysqlNodeIP = '192.168.1.104'
+mysqlNodeIP = '192.168.1.100'
 
 
 def getTickCursorAndDB():
